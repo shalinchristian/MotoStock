@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoStock Dealership</title>
+
+    <script src="/lib/angular/angular.min.js"></script>
+    <script src="/lib/chart.js/chart.umd.js"></script>
+    <script src="motoModule.js"></script>
+    <script src="controllers/mainCtrl.js"></script>
+    <script src="controllers/dashboardCtrl.js"></script>
+    <script src="controllers/catalogCtrl.js"></script>
+    <script src="controllers/salesCtrl.js"></script>
+    <script src="controllers/bookingCtrl.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body ng-app="motoApp" ng-controller="mainCtrl">
+
+<!-- Top bar -->
+<header class="topbar">
+    <h1>MotoStock</h1>
+    <nav>
+        <button ng-class="{active: page=='dashboard'}" ng-click="show('dashboard')" ng-show="user">Dashboard</button>
+        <button ng-class="{active: page=='catalog'}" ng-click="show('catalog')">Catalog</button>
+        <button ng-class="{active: page=='sales'}" ng-click="show('sales')" ng-show="user">Sales</button>
+        <button ng-class="{active: page=='bookings'}" ng-click="show('bookings')" ng-show="user">Test Rides</button>
+    </nav>
+    <div class="who">
+        <span ng-show="user">{{user.fullName}} ({{user.role}})</span>
+        <button ng-show="user" ng-click="logout()">Logout</button>
+        <button ng-hide="user" ng-click="show('login')">Staff Login</button>
+    </div>
+</header>
+
+<main>
+
+<!-- ============ LOGIN ============ -->
+<section ng-show="page=='login'" class="login">
+    <h2 class="title">Staff Login</h2>
+    <form name="loginForm" ng-submit="login()" class="card">
+        <table>
+            <tr>
+                <td>Username :</td>
+                <td><input type="text" ng-model="loginData.username" required></td>
+            </tr>
+            <tr>
+                <td>Password :</td>
+                <td><input type="password" ng-model="loginData.password" required></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button type="submit" ng-disabled="loginForm.$invalid">Login</button></td>
+            </tr>
+        </table>
+        <p class="msg" ng-show="loginMsg">{{loginMsg}}</p>
+        <p class="hint">Demo accounts: admin / admin123, staff / staff123</p>
+    </form>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section ng-controller="dashboardCtrl" ng-show="page=='dashboard'">
+    <h2 class="title">Dashboard</h2>
+
+    <div class="tiles">
+        <div class="tile"><b>{{stats.totalModels}}</b>Models</div>
+        <div class="tile"><b>{{stats.unitsInStock}}</b>Units in stock</div>
+        <div class="tile"><b>{{stats.inventoryValue | rupees}}</b>Inventory value</div>
+        <div class="tile"><b>{{stats.salesThisMonth}}</b>Sold this month</div>
+        <div class="tile"><b>{{stats.revenueThisMonth | rupees}}</b>Revenue this month</div>
+        <div class="tile"><b>{{stats.upcomingTestRides}}</b>Upcoming test rides</div>
+        <div class="tile warn"><b>{{stats.lowStockCount}}</b>Low-stock alerts</div>
+    </div>
+
+    <div class="charts">
+        <div class="card chart"><h3>Stock by brand</h3><div class="canvas"><canvas id="stockChart"></canvas></div></div>
+        <div class="card chart"><h3>Stock by category</h3><div class="canvas"><canvas id="categoryChart"></canvas></div></div>
+        <div class="card chart wide"><h3>Sales - last 6 months</h3><div class="canvas"><canvas id="salesChart"></canvas></div></div>
+    </div>
+
+    <div class="card" ng-show="stats.lowStock.length">
+        <h3>Low-stock alerts</h3>
+        <table border="1" class="grid">
+            <tr><th>Bike</th><th>In stock</th><th>Alert at</th></tr>
+            <tr ng-repeat="item in stats.lowStock track by item.id" ng-class="{out: item.stockQuantity==0}">
+                <td>{{item.brand}} {{item.model}}</td>
+                <td>{{item.stockQuantity}}</td>
+                <td>&le; {{item.lowStockThreshold}}</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<!-- ============ CATALOG ============ -->
+<section ng-controller="catalogCtrl" ng-show="page=='catalog'">
+    <h2 class="title">Bike Catalog</h2>
+
+    <form class="filters card" ng-submit="readBikes()">
+        <input type="text" ng-model="filter.q" placeholder="Search brand, model, colour" ng-change="readBikes()" ng-model-options="{debounce: 300}">
+        <select ng-model="filter.brand" ng-change="readBikes()">
+            <option value="">All brands</option>
+            <option ng-repeat="b in brands" value="{{b}}">{{b}}</option>
+        </select>
+        <select ng-model="filter.category" ng-change="readBikes()">
+            <option value="">All categories</option>
+            <option ng-repeat="c in categories" value="{{c}}">{{c}}</option>
+        </select>
+        <input type="number" ng-model="filter.minPrice" placeholder="Min ₹" ng-change="readBikes()" ng-model-options="{debounce: 400}">
+        <input type="number" ng-model="filter.maxPrice" placeholder="Max ₹" ng-change="readBikes()" ng-model-options="{debounce: 400}">
+        <label><input type="checkbox" ng-model="filter.inStock" ng-change="readBikes()"> In stock only</label>
+        <select ng-model="filter.sort" ng-change="readBikes()">
+            <option value="name">Name</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+            <option value="year_desc">Newest</option>
+            <option value="stock_asc">Lowest stock</option>
+        </select>
+        <button type="button" ng-click="clearFilter()">Clear</button>
+        <button type="button" class="primary" ng-show="user" ng-click="openAdd()">+ Add Bike</button>
+    </form>
+
+    <h3 class="msg" ng-show="msg">Message : {{msg}}</h3>
+
+    <!-- Add / Edit form -->
+    <form name="bikeForm" class="card" ng-show="formOpen" ng-submit="addNewBike()">
+        <h3>{{editStat ? 'Edit Bike' : 'Add Bike'}}</h3>
+        <div class="form-grid">
+            <label>Brand *<input type="text" ng-model="newBike.brand" required></label>
+            <label>Model *<input type="text" ng-model="newBike.model" required></label>
+            <label>Year *<input type="number" ng-model="newBike.manufacturingYear" min="1900" max="2100" required></label>
+            <label>Price (₹) *<input type="number" ng-model="newBike.price" min="1" required></label>
+            <label>Colour *<input type="text" ng-model="newBike.color" required></label>
+            <label ng-hide="newBike.category=='ELECTRIC'">Engine (cc) *<input type="number" ng-model="newBike.engineCapacityCc" min="50" ng-required="newBike.category!='ELECTRIC'"></label>
+            <label ng-show="newBike.category=='ELECTRIC'">Motor power (kW) *<input type="number" ng-model="newBike.motorPowerKw" min="0.1" step="0.1" ng-required="newBike.category=='ELECTRIC'"></label>
+            <label>Stock *<input type="number" ng-model="newBike.stockQuantity" min="0" required></label>
+            <label>Low-stock alert at<input type="number" ng-model="newBike.lowStockThreshold" min="0"></label>
+            <label>Category
+                <select ng-model="newBike.category"><option ng-repeat="c in categories" value="{{c}}">{{c}}</option></select>
+            </label>
+            <label class="wide">Photo URL<input type="text" ng-model="newBike.photoUrl" placeholder="https://... or /img/sport.svg"></label>
+            <label>Power (hp)<input type="number" ng-model="newBike.powerHp" min="0"></label>
+            <label>Torque (Nm)<input type="number" ng-model="newBike.torqueNm" min="0"></label>
+            <label>Weight (kg)<input type="number" ng-model="newBike.weightKg" min="0"></label>
+            <label>Top speed (km/h)<input type="number" ng-model="newBike.topSpeedKmh" min="0"></label>
+            <label>Fuel
+                <select ng-model="newBike.fuelType"><option>Petrol</option><option>Electric</option><option>Hybrid</option></select>
+            </label>
+            <label>Transmission
+                <select ng-model="newBike.transmission"><option>Manual</option><option>Automatic</option></select>
+            </label>
+            <label class="wide">Description<textarea ng-model="newBike.description" rows="2"></textarea></label>
+        </div>
+        <button type="submit" ng-disabled="editStat || bikeForm.$invalid">Add New Bike</button>
+        <button type="button" ng-disabled="!editStat || bikeForm.$invalid" ng-click="updateBike(newBike)">Update Bike</button>
+        <button type="button" ng-click="closeForm()">Cancel</button>
+    </form>
+
+    <div class="bikes">
+        <div class="bike card" ng-repeat="item in bikes track by item.id" ng-class="{low: item.lowStock}">
+            <img ng-src="{{item.photoUrl || '/img/standard.svg'}}" alt="{{item.model}}">
+            <div class="bike-body">
+                <h3>{{item.brand}} {{item.model}}</h3>
+                <p class="price">{{item.price | rupees}}</p>
+                <p class="meta">{{item.manufacturingYear}} · {{item | powerUnit}} · {{item.color}} · {{item.category}}</p>
+                <p class="meta" ng-show="item.powerHp">{{item.powerHp}} hp · {{item.torqueNm}} Nm · {{item.weightKg}} kg · {{item.topSpeedKmh}} km/h</p>
+                <p class="stock">
+                    Stock: <b>{{item.stockQuantity}}</b>
+                    <span class="badge" ng-show="item.lowStock && item.stockQuantity > 0">Low stock</span>
+                    <span class="badge out" ng-show="item.stockQuantity == 0">Out of stock</span>
+                </p>
+                <p class="desc">{{item.description}}</p>
+                <div ng-show="user" class="actions">
+                    <button ng-click="edit(item)">Edit</button>
+                    <button ng-click="adjustStock(item, 1)">+1 stock</button>
+                    <button ng-click="adjustStock(item, -1)" ng-disabled="item.stockQuantity == 0">-1 stock</button>
+                    <button ng-show="isAdmin()" class="danger" ng-click="deleteBike(item)">Delete</button>
+                </div>
+            </div>
+        </div>
+        <p ng-show="bikes.length == 0">No bikes match these filters.</p>
+    </div>
+</section>
+
+<!-- ============ SALES ============ -->
+<section ng-controller="salesCtrl" ng-show="page=='sales'">
+    <h2 class="title">Sales</h2>
+
+    <form name="saleForm" class="card" ng-submit="addSale()">
+        <h3>Record a sale</h3>
+        <div class="form-grid">
+            <label class="wide">Bike *
+                <select ng-model="newSale.motorcycleId" required>
+                    <option value="">-- choose --</option>
+                    <option ng-repeat="b in bikes" value="{{b.id}}">{{b.brand}} {{b.model}} ({{b.stockQuantity}} in stock, {{b.price | rupees}})</option>
+                </select>
+            </label>
+            <label>Quantity *<input type="number" ng-model="newSale.quantity" min="1" max="{{selectedBike().stockQuantity}}" required></label>
+            <label>Unit price (₹)<input type="number" ng-model="newSale.unitPrice" min="1" placeholder="{{selectedBike().price}}"></label>
+            <label>Customer name *<input type="text" ng-model="newSale.customerName" required></label>
+            <label>Phone<input type="text" ng-model="newSale.customerPhone"></label>
+            <label>Email<input type="email" ng-model="newSale.customerEmail"></label>
+        </div>
+        <button type="submit" ng-disabled="saleForm.$invalid">Record Sale</button>
+    </form>
+
+    <h3 class="msg" ng-show="msg">Message : {{msg}}</h3>
+
+    <div class="card">
+        <h3>Sales history <small>({{sales.length}} sales, {{total() | rupees}})</small></h3>
+        <table border="1" class="grid">
+            <tr><th>Date</th><th>Bike</th><th>Qty</th><th>Unit price</th><th>Total</th><th>Customer</th><th>Sold by</th></tr>
+            <tr ng-repeat="item in sales track by item.id">
+                <td>{{item.soldAt | date:'dd MMM yyyy'}}</td>
+                <td>{{item.motorcycleName}}</td>
+                <td>{{item.quantity}}</td>
+                <td>{{item.unitPrice | rupees}}</td>
+                <td>{{item.totalPrice | rupees}}</td>
+                <td>{{item.customerName}} <small>{{item.customerPhone}}</small></td>
+                <td>{{item.soldBy}}</td>
+            </tr>
+        </table>
+    </div>
+</section>
+
+<!-- ============ TEST RIDES ============ -->
+<section ng-controller="bookingCtrl" ng-show="page=='bookings'">
+    <h2 class="title">Test Ride Calendar</h2>
+
+    <div class="booking-layout">
+        <div class="card calendar">
+            <div class="cal-head">
+                <button ng-click="changeMonth(-1)">&lt;</button>
+                <h3>{{month | date:'MMMM yyyy'}}</h3>
+                <button ng-click="changeMonth(1)">&gt;</button>
+            </div>
+            <table class="cal">
+                <tr><th ng-repeat="d in weekDays">{{d}}</th></tr>
+                <tr ng-repeat="week in weeks">
+                    <td ng-repeat="day in week" ng-click="pickDay(day)"
+                        ng-class="{other: !day.inMonth, today: day.today, picked: selectedDay.key == day.key}">
+                        <span class="num">{{day.date | date:'d'}}</span>
+                        <div class="ride" ng-repeat="r in day.rides" ng-class="r.status | lowercase" title="{{r.motorcycleName}}">
+                            {{r.scheduledAt | date:'HH:mm'}} {{r.customerName}}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <form name="rideForm" class="card" ng-submit="bookRide()">
+                <h3>Book a test ride</h3>
+                <label>Bike *
+                    <select ng-model="newRide.motorcycleId" required>
+                        <option value="">-- choose --</option>
+                        <option ng-repeat="b in bikes" value="{{b.id}}">{{b.brand}} {{b.model}}</option>
+                    </select>
+                </label>
+                <label>Date &amp; time *<input type="datetime-local" ng-model="newRide.scheduledAt" required></label>
+                <label>Duration (min)<input type="number" ng-model="newRide.durationMinutes" min="15" max="240"></label>
+                <label>Customer name *<input type="text" ng-model="newRide.customerName" required></label>
+                <label>Phone *<input type="text" ng-model="newRide.customerPhone" required></label>
+                <label>Email<input type="email" ng-model="newRide.customerEmail"></label>
+                <label>Licence no.<input type="text" ng-model="newRide.licenseNumber"></label>
+                <label>Notes<textarea ng-model="newRide.notes" rows="2"></textarea></label>
+                <button type="submit" ng-disabled="rideForm.$invalid">Book Test Ride</button>
+                <p class="msg" ng-show="msg">Message : {{msg}}</p>
+            </form>
+
+            <div class="card" ng-show="selectedDay">
+                <h3>{{selectedDay.date | date:'EEE dd MMM'}}</h3>
+                <p ng-hide="selectedDay.rides.length">No test rides.</p>
+                <div class="ride-row" ng-repeat="r in selectedDay.rides">
+                    <b>{{r.scheduledAt | date:'HH:mm'}}</b> {{r.motorcycleName}}<br>
+                    {{r.customerName}} · {{r.customerPhone}} · <i>{{r.status}}</i><br>
+                    <span ng-show="r.status=='SCHEDULED'">
+                        <button ng-click="setStatus(r, 'COMPLETED')">Completed</button>
+                        <button ng-click="setStatus(r, 'NO_SHOW')">No-show</button>
+                        <button class="danger" ng-click="setStatus(r, 'CANCELLED')">Cancel</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+</body>
+</html>

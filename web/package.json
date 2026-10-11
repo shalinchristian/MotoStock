@@ -1,0 +1,17 @@
+{
+  "name": "motostock-web",
+  "version": "1.0.0",
+  "description": "MotoStock dealership front end (AngularJS 1.8 + Express)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && for f in MotoApp/*.js MotoApp/controllers/*.js; do node --check $f || exit 1; done"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "angular": "1.8.2",
+    "chart.js": "^4.4.0",
+    "express": "^5.2.1"
+  }
+}

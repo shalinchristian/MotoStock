@@ -1,0 +1,75 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background-color: bisque; color: #222; }
+
+.topbar { background-color: black; color: white; display: flex; align-items: center; gap: 20px; padding: 10px 20px; flex-wrap: wrap; }
+.topbar h1 { margin: 0; font-size: 24px; color: #ff922b; }
+.topbar nav { display: flex; gap: 6px; flex: 1; }
+.topbar button { background: #333; color: white; border: 0; padding: 8px 14px; cursor: pointer; border-radius: 4px; }
+.topbar button.active { background: #e8590c; }
+.who { display: flex; gap: 10px; align-items: center; }
+
+main { padding: 20px; max-width: 1300px; margin: 0 auto; }
+.title { background-color: black; color: white; text-align: center; padding: 8px; margin-top: 0; }
+.msg { background-color: yellow; color: red; padding: 6px 10px; }
+.hint { color: #666; font-size: 13px; }
+
+.card { background: white; border-radius: 6px; padding: 14px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+button { padding: 6px 12px; cursor: pointer; }
+button.primary { background: #e8590c; color: white; border: 0; }
+button.danger { background: #c92a2a; color: white; border: 0; }
+input, select, textarea { padding: 6px; font: inherit; }
+
+.login { max-width: 420px; margin: 0 auto; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile { background: white; border-left: 5px solid #e8590c; padding: 12px; border-radius: 6px; font-size: 13px; color: #555; }
+.tile b { display: block; font-size: 22px; color: #111; }
+.tile.warn { border-color: #c92a2a; }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.chart.wide { grid-column: 1 / -1; }
+.canvas { position: relative; height: 260px; }
+
+.grid { border-collapse: collapse; width: 100%; }
+.grid th { background: #eee; }
+.grid td, .grid th { padding: 6px 8px; text-align: left; }
+tr.out td { color: #c92a2a; font-weight: bold; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters input[type=text] { flex: 1; min-width: 200px; }
+.filters input[type=number] { width: 110px; }
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.form-grid label, form label { display: flex; flex-direction: column; font-size: 13px; gap: 3px; margin-bottom: 6px; }
+.form-grid .wide { grid-column: span 2; }
+
+.bikes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.bike { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+.bike img { width: 100%; height: 160px; object-fit: cover; background: #f1f3f5; }
+.bike-body { padding: 12px; }
+.bike h3 { margin: 0 0 4px; }
+.bike.low { outline: 2px solid #f08c00; }
+.price { font-size: 20px; font-weight: bold; color: #e8590c; margin: 4px 0; }
+.meta, .desc { font-size: 13px; color: #555; margin: 3px 0; }
+.badge { background: #f08c00; color: white; font-size: 11px; padding: 2px 6px; border-radius: 10px; }
+.badge.out { background: #c92a2a; }
+.actions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+
+.booking-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.cal-head { display: flex; justify-content: space-between; align-items: center; }
+.cal { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cal th { padding: 4px; background: #eee; }
+.cal td { border: 1px solid #ddd; height: 90px; vertical-align: top; padding: 3px; cursor: pointer; font-size: 11px; }
+.cal td.other { background: #f8f9fa; color: #aaa; }
+.cal td.today { background: #fff4e6; }
+.cal td.picked { outline: 2px solid #e8590c; }
+.cal .num { font-weight: bold; font-size: 12px; }
+.ride { background: #1c7ed6; color: white; border-radius: 3px; padding: 1px 3px; margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ride.completed { background: #2f9e44; }
+.ride.cancelled { background: #adb5bd; text-decoration: line-through; }
+.ride.no_show { background: #c92a2a; }
+.ride-row { border-top: 1px solid #eee; padding: 6px 0; font-size: 13px; }
+
+@media (max-width: 800px) {
+    .charts, .booking-layout { grid-template-columns: 1fr; }
+    .form-grid .wide { grid-column: auto; }
+}

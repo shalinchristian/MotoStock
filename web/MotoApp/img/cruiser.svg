@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240">
+<rect width="400" height="240" fill="#f1f3f5"/><ellipse cx="200" cy="212" rx="170" ry="8" fill="#dee2e6"/>
+<circle cx="82" cy="175" r="40" fill="#222"/><circle cx="82" cy="175" r="27" fill="#d0d4d8"/><circle cx="82" cy="175" r="24" fill="none" stroke="#888" stroke-width="3"/><line x1="82" y1="175" x2="106" y2="175" stroke="#666" stroke-width="4"/><line x1="82" y1="175" x2="94" y2="196" stroke="#666" stroke-width="4"/><line x1="82" y1="175" x2="70" y2="196" stroke="#666" stroke-width="4"/><line x1="82" y1="175" x2="58" y2="175" stroke="#666" stroke-width="4"/><line x1="82" y1="175" x2="70" y2="154" stroke="#666" stroke-width="4"/><line x1="82" y1="175" x2="94" y2="154" stroke="#666" stroke-width="4"/><circle cx="82" cy="175" r="8" fill="#555"/><circle cx="325" cy="175" r="40" fill="#222"/><circle cx="325" cy="175" r="27" fill="#d0d4d8"/><circle cx="325" cy="175" r="24" fill="none" stroke="#888" stroke-width="3"/><line x1="325" y1="175" x2="349" y2="175" stroke="#666" stroke-width="4"/><line x1="325" y1="175" x2="337" y2="196" stroke="#666" stroke-width="4"/><line x1="325" y1="175" x2="313" y2="196" stroke="#666" stroke-width="4"/><line x1="325" y1="175" x2="301" y2="175" stroke="#666" stroke-width="4"/><line x1="325" y1="175" x2="313" y2="154" stroke="#666" stroke-width="4"/><line x1="325" y1="175" x2="337" y2="154" stroke="#666" stroke-width="4"/><circle cx="325" cy="175" r="8" fill="#555"/>
+<rect x="170" y="140" width="58" height="42" rx="8" fill="#adb5bd"/><path d="M178 140 L190 112 L206 112 L198 140 Z M206 140 L218 112 L232 112 L222 140 Z" fill="#ced4da" stroke="#868e96" stroke-width="2"/>
+<path d="M82 175 L140 150 L250 150 L325 175" fill="none" stroke="#343a40" stroke-width="7"/>
+<path d="M270 70 L325 175" stroke="#adb5bd" stroke-width="8"/>
+<path d="M190 118 Q215 92 262 102 Q275 110 266 124 L200 128 Z" fill="#7a3e1d"/>
+<path d="M110 140 Q140 120 190 126 L195 140 Q150 148 110 150 Z" fill="#212529"/>
+<path d="M45 150 Q80 128 120 140" stroke="#7a3e1d" stroke-width="9" fill="none"/>
+<path d="M250 62 Q262 52 282 66" stroke="#212529" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="288" cy="90" r="12" fill="#ffe066" stroke="#adb5bd" stroke-width="4"/>
+<path d="M180 184 L110 194 L40 190" stroke="#ced4da" stroke-width="10" fill="none" stroke-linecap="round"/>
+<text x="200" y="32" font-family="Arial,sans-serif" font-size="20" font-weight="bold" fill="#7a3e1d" text-anchor="middle">CRUISER</text></svg>
